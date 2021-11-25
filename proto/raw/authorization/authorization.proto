@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package authorization;
+
+option go_package = "./";
+
+service UserService {
+  rpc IdentifyUser(UserData) returns (UserRequest);
+  rpc CreateUser(UserData) returns (UserRequest);
+}
+
+message UserData {
+  string login = 1;
+  string password = 2;
+}
+
+message UserRequest {
+  bool ok = 1;
+  UserError err = 2;
+}
+
+message UserError {
+  string err = 1;
+  int32 id = 2;
+}
