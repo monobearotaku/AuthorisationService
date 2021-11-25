@@ -21,7 +21,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer grpcServer.Close()
-	log.Printf("start listening for emails at port %s", ":20100")
+	log.Printf("start listening for requests at port %s", ":20100")
 
 	rpcserv := grpc.NewServer()
 	pb.RegisterUserServiceServer(rpcserv, &grpcServer)

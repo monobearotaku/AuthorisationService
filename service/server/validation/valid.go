@@ -11,7 +11,7 @@ func validateEmail(email string) bool {
 }
 
 func validatePassword(pass string) bool {
-	return len([]rune(pass)) < 8
+	return len([]rune(pass)) >= 8
 }
 
 func CorrectInput(in *pb.UserData) (bool, *pb.UserError) {

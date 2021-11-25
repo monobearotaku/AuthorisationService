@@ -3,23 +3,23 @@ package dbCommands
 import (
 	"database/sql"
 	"fmt"
+	pb "github.com/ash0tych/gRPC_MusicService/proto/compiled/authorization"
 	_ "github.com/lib/pq"
 )
 
-func ConnectToDb(db *sql.DB) error {
-	var err error
-	conn := fmt.Sprintf("host=localhost port=8080 user=postgres password=z]/q1937 dbname=UserAuthorization sslmode=disable")
-	db, err = sql.Open("postgres", conn)
+func ConnectToDb() (*sql.DB, error) {
+	conn := fmt.Sprintf("host=localhost port=8080 user=postgres password=12345678 dbname=UserAuthorization sslmode=disable")
+	bufferDb, err := sql.Open("postgres", conn)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = db.Ping()
+	err = bufferDb.Ping()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return bufferDb, nil
 }
 
 func CloseDb(db *sql.DB) error {
@@ -30,11 +30,36 @@ func CloseDb(db *sql.DB) error {
 	return nil
 }
 
-func CheckUserInDb(db *sql.DB, login, password string) (bool, error) {
-	query := fmt.Sprintf("SELECT id FROM Users WHERE login=%v AND password=%v", login, password)
-	rows, err := db.Query(query)
+func CheckUserInDb(db *sql.DB, login, password string) (bool, *pb.UserError, error) {
+	query := `SELECT id, password FROM "Users" WHERE login=$1`
+	rows, err := db.Query(query, login)
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
-	return rows.Next(), nil
+
+	if rows.Next() {
+		var dbPassword string
+		var dbId string
+
+		err = rows.Scan(&dbId, &dbPassword)
+		if err != nil {
+			return false, nil, err
+		}
+
+		if dbPassword == password {
+			return true, nil, nil
+		}
+
+		if dbPassword != "" {
+			panic(nil)
+			return false, &pb.UserError{
+				Err: "Wrong password",
+				Id:  3,
+			}, nil
+		}
+	}
+	return false, &pb.UserError{
+		Err: "User not found",
+		Id:  4,
+	}, nil
 }

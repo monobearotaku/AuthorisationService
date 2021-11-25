@@ -15,7 +15,8 @@ type Server struct {
 }
 
 func (s *Server) Start() error {
-	err := dbComm.ConnectToDb(s.DatabaseConn)
+	var err error
+	s.DatabaseConn, err = dbComm.ConnectToDb()
 	if err != nil {
 		return err
 	}
@@ -27,11 +28,26 @@ func (s *Server) Close() {
 }
 
 func (s *Server) IdentifyUser(ctx context.Context, in *pb.UserData) (*pb.UserRequest, error) {
-	err, UserError := valid.CorrectInput(in)
-	if !err {
+	flag, UserError := valid.CorrectInput(in)
+	if !flag {
 		return &pb.UserRequest{
-			Ok:  err,
+			Ok:  flag,
 			Err: UserError,
+		}, nil
+	}
+
+	access, UserError, err := dbComm.CheckUserInDb(s.DatabaseConn, in.Login, in.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	if !access {
+		return &pb.UserRequest{
+			Ok: false,
+			Err: &pb.UserError{
+				Err: "Wrong password",
+				Id:  3,
+			},
 		}, nil
 	}
 
