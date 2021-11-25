@@ -18,7 +18,7 @@ func CorrectInput(in *pb.UserData) (bool, *pb.UserError) {
 	IsValidEmail := validateEmail(in.Login)
 	if !IsValidEmail {
 		return false, &pb.UserError{
-			Err: "Incorrect Email",
+			Err: "Incorrect Email format",
 			Id:  1,
 		}
 	}
@@ -26,7 +26,7 @@ func CorrectInput(in *pb.UserData) (bool, *pb.UserError) {
 	IsValidPassword := validatePassword(in.Password)
 	if !IsValidPassword {
 		return false, &pb.UserError{
-			Err: "Incorrect Password",
+			Err: "Incorrect Password format",
 			Id:  2,
 		}
 	}

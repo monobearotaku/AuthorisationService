@@ -29,3 +29,12 @@ func CloseDb(db *sql.DB) error {
 	}
 	return nil
 }
+
+func CheckUserInDb(db *sql.DB, login, password string) (bool, error) {
+	query := fmt.Sprintf("SELECT id FROM Users WHERE login=%v AND password=%v", login, password)
+	rows, err := db.Query(query)
+	if err != nil {
+		return false, err
+	}
+	return rows.Next(), nil
+}

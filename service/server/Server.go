@@ -23,7 +23,7 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) Close() {
-	dbComm.CloseDb(s.DatabaseConn)
+	_ = dbComm.CloseDb(s.DatabaseConn)
 }
 
 func (s *Server) IdentifyUser(ctx context.Context, in *pb.UserData) (*pb.UserRequest, error) {
@@ -42,7 +42,6 @@ func (s *Server) IdentifyUser(ctx context.Context, in *pb.UserData) (*pb.UserReq
 }
 
 func (s *Server) CreateUser(ctx context.Context, in *pb.UserData) (*pb.UserRequest, error) {
-
 	return &pb.UserRequest{
 		Ok:  true,
 		Err: nil,
