@@ -1,7 +1,7 @@
 package validation
 
 import (
-	pb "github.com/ash0tych/gRPC_1/proto/compiled/authorization"
+	pb "github.com/ash0tych/gRPC_MusicService/proto/compiled/authorization"
 	"net/mail"
 )
 

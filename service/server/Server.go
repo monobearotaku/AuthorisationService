@@ -3,30 +3,27 @@ package server
 import (
 	"context"
 	"database/sql"
-	pb "github.com/ash0tych/gRPC_1/proto/compiled/authorization"
-	dbComm "github.com/ash0tych/gRPC_1/service/server/dbCommands"
-	valid "github.com/ash0tych/gRPC_1/service/server/validation"
+	pb "github.com/ash0tych/gRPC_MusicService/proto/compiled/authorization"
+	dbComm "github.com/ash0tych/gRPC_MusicService/service/server/dbCommands"
+	valid "github.com/ash0tych/gRPC_MusicService/service/server/validation"
 	_ "github.com/lib/pq"
-	"log"
 )
 
 type Server struct {
 	DatabaseConn *sql.DB
+	pb.UnimplementedUserServiceServer
 }
 
-func (s *Server) Start() {
+func (s *Server) Start() error {
 	err := dbComm.ConnectToDb(s.DatabaseConn)
 	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (s *Server) Close() error {
-	err := dbComm.CloseDb(s.DatabaseConn)
-	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	return nil
+}
+
+func (s *Server) Close() {
+	dbComm.CloseDb(s.DatabaseConn)
 }
 
 func (s *Server) IdentifyUser(ctx context.Context, in *pb.UserData) (*pb.UserRequest, error) {
@@ -37,6 +34,14 @@ func (s *Server) IdentifyUser(ctx context.Context, in *pb.UserData) (*pb.UserReq
 			Err: UserError,
 		}, nil
 	}
+
+	return &pb.UserRequest{
+		Ok:  true,
+		Err: nil,
+	}, nil
+}
+
+func (s *Server) CreateUser(ctx context.Context, in *pb.UserData) (*pb.UserRequest, error) {
 
 	return &pb.UserRequest{
 		Ok:  true,
