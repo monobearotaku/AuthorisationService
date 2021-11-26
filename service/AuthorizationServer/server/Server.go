@@ -28,7 +28,6 @@ func (s *Server) Start() error {
 	s.DatabaseConn, err = dbComm.ConnectToDb()
 	if err != nil {
 
-
 		return err
 	}
 	return nil
@@ -122,8 +121,20 @@ func (s *Server) CreateUser(ctx context.Context, in *pb.UserData) (*pb.UserReque
 		return nil, err
 	}
 
+	expirationTime := time.Now().Add(5 * time.Minute)
+	claims := &Claims{
+		Email: in.Login,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(signKey))
+
 	return &pb.UserRequest{
-		Ok:  true,
-		Err: nil,
+		Ok:    true,
+		Err:   nil,
+		Token: tokenString,
 	}, nil
 }
