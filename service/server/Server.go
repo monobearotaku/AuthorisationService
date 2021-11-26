@@ -36,15 +36,28 @@ func (s *Server) IdentifyUser(ctx context.Context, in *pb.UserData) (*pb.UserReq
 		}, nil
 	}
 
-	access, UserError, err := dbComm.CheckUserInDb(s.DatabaseConn, in.Login, in.Password)
+	userInDb, err := dbComm.CheckLoginInDb(s.DatabaseConn, in.Login)
 	if err != nil {
 		return nil, err
 	}
+	if !userInDb {
+		return &pb.UserRequest{
+			Ok: false,
+			Err: &pb.UserError{
+				Err: "User not found",
+				Id:  4,
+			},
+		}, nil
+	}
 
+	access, err := dbComm.CheckCorrectPassword(s.DatabaseConn, in.Login, in.Password)
 	if !access {
 		return &pb.UserRequest{
-			Ok:  false,
-			Err: UserError,
+			Ok: false,
+			Err: &pb.UserError{
+				Err: "Wrong password",
+				Id:  3,
+			},
 		}, nil
 	}
 
@@ -55,6 +68,33 @@ func (s *Server) IdentifyUser(ctx context.Context, in *pb.UserData) (*pb.UserReq
 }
 
 func (s *Server) CreateUser(ctx context.Context, in *pb.UserData) (*pb.UserRequest, error) {
+	correct, UserError := valid.CorrectInput(in)
+	if !correct {
+		return &pb.UserRequest{
+			Ok:  false,
+			Err: UserError,
+		}, nil
+	}
+
+	userInDb, err := dbComm.CheckLoginInDb(s.DatabaseConn, in.Login)
+	if err != nil {
+		return nil, err
+	}
+	if userInDb {
+		return &pb.UserRequest{
+			Ok: false,
+			Err: &pb.UserError{
+				Err: "User already exists",
+				Id:  5,
+			},
+		}, nil
+	}
+
+	err = dbComm.CreateUserInDb(s.DatabaseConn, in.Login, in.Password)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.UserRequest{
 		Ok:  true,
 		Err: nil,

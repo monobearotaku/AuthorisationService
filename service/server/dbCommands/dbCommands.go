@@ -3,7 +3,6 @@ package dbCommands
 import (
 	"database/sql"
 	"fmt"
-	pb "github.com/ash0tych/gRPC_MusicService/proto/compiled/authorization"
 	_ "github.com/lib/pq"
 )
 
@@ -30,36 +29,46 @@ func CloseDb(db *sql.DB) error {
 	return nil
 }
 
-func CheckUserInDb(db *sql.DB, login, password string) (bool, *pb.UserError, error) {
+func CheckCorrectPassword(db *sql.DB, login, password string) (bool, error) {
 	query := `SELECT id, password FROM "Users" WHERE login=$1`
 	rows, err := db.Query(query, login)
 	if err != nil {
-		return false, nil, err
+		return false, err
 	}
 
+	var dbId string
+	var dbPassword string
+
+	rows.Next()
+	err = rows.Scan(&dbId, &dbPassword)
+	if err != nil {
+		return false, err
+	}
+
+	if dbPassword != password {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func CheckLoginInDb(db *sql.DB, login string) (bool, error) {
+	query := `SELECT id FROM "Users" WHERE login=$1`
+	rows, err := db.Query(query, login)
+	if err != nil {
+		return false, err
+	}
 	if rows.Next() {
-		var dbId string
-		var dbPassword string
-
-		err = rows.Scan(&dbId, &dbPassword)
-		if err != nil {
-			return false, nil, err
-		}
-
-		if dbPassword != password {
-			return false, &pb.UserError{
-				Err: "Wrong password",
-				Id:  3,
-			}, nil
-		}
-
-	} else {
-		return false, &pb.UserError{
-			Err: "User not found",
-			Id:  4,
-		}, nil
+		return true, nil
 	}
+	return false, nil
+}
 
-	return true, nil, nil
-
+func CreateUserInDb(db *sql.DB, login, password string) error {
+	query := `INSERT into "Users" (login, password) values ($1, $2)`
+	_, err := db.Exec(query, login, password)
+	if err != nil {
+		return err
+	}
+	return nil
 }
