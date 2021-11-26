@@ -1,8 +1,8 @@
 gen:
 	protoc --go_out=proto/compiled --go-grpc_out=proto/compiled  proto/raw/authorization/authorization.proto
 
-run_server:
+runS:
 	go run service/main.go
 
-run_client:
+runC:
 	go run client/main.go
