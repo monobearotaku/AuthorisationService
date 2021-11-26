@@ -43,11 +43,8 @@ func (s *Server) IdentifyUser(ctx context.Context, in *pb.UserData) (*pb.UserReq
 
 	if !access {
 		return &pb.UserRequest{
-			Ok: false,
-			Err: &pb.UserError{
-				Err: "Wrong password",
-				Id:  3,
-			},
+			Ok:  false,
+			Err: UserError,
 		}, nil
 	}
 

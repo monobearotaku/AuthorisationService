@@ -38,28 +38,28 @@ func CheckUserInDb(db *sql.DB, login, password string) (bool, *pb.UserError, err
 	}
 
 	if rows.Next() {
-		var dbPassword string
 		var dbId string
+		var dbPassword string
 
 		err = rows.Scan(&dbId, &dbPassword)
 		if err != nil {
 			return false, nil, err
 		}
 
-		if dbPassword == password {
-			return true, nil, nil
-		}
-
-		if dbPassword != "" {
-			panic(nil)
+		if dbPassword != password {
 			return false, &pb.UserError{
 				Err: "Wrong password",
 				Id:  3,
 			}, nil
 		}
+
+	} else {
+		return false, &pb.UserError{
+			Err: "User not found",
+			Id:  4,
+		}, nil
 	}
-	return false, &pb.UserError{
-		Err: "User not found",
-		Id:  4,
-	}, nil
+
+	return true, nil, nil
+
 }

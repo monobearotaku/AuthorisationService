@@ -20,7 +20,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	reply, err := client.IdentifyUser(ctx, &pb.UserData{Login: "ash0tykit101@gmail.com", Password: "12345678"})
+	reply, err := client.IdentifyUser(ctx, &pb.UserData{Login: "ash0tykit10@gmail.com", Password: "12345678"})
 	if err != nil {
 		log.Fatal(err)
 	}
