@@ -2,7 +2,7 @@ package main
 
 import (
 	pb "github.com/ash0tych/gRPC_MusicService/proto/compiled/authorization"
-	"github.com/ash0tych/gRPC_MusicService/service/server"
+	"github.com/ash0tych/gRPC_MusicService/service/AuthorizationServer/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"log"

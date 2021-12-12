@@ -4,14 +4,23 @@ import (
 	"context"
 	"database/sql"
 	pb "github.com/ash0tych/gRPC_MusicService/proto/compiled/authorization"
-	dbComm "github.com/ash0tych/gRPC_MusicService/service/server/dbCommands"
-	valid "github.com/ash0tych/gRPC_MusicService/service/server/validation"
+	dbComm "github.com/ash0tych/gRPC_MusicService/service/AuthorizationServer/dbCommands"
+	valid "github.com/ash0tych/gRPC_MusicService/service/AuthorizationServer/validation"
+	"github.com/dgrijalva/jwt-go"
 	_ "github.com/lib/pq"
+	"time"
 )
+
+const signKey string = "Hello World"
 
 type Server struct {
 	DatabaseConn *sql.DB
 	pb.UnimplementedUserServiceServer
+}
+
+type Claims struct {
+	jwt.StandardClaims
+	Email string
 }
 
 func (s *Server) Start() error {
@@ -61,9 +70,25 @@ func (s *Server) IdentifyUser(ctx context.Context, in *pb.UserData) (*pb.UserReq
 		}, nil
 	}
 
+	expirationTime := time.Now().Add(5 * time.Minute)
+	claims := &Claims{
+		Email: in.Login,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(signKey))
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.UserRequest{
-		Ok:  true,
-		Err: nil,
+		Ok:    true,
+		Err:   nil,
+		Token: tokenString,
 	}, nil
 }
 

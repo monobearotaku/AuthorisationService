@@ -15,7 +15,8 @@ message UserData {
 
 message UserRequest {
   bool ok = 1;
-  UserError err = 2;
+  string token = 2;
+  UserError err = 3;
 }
 
 message UserError {
