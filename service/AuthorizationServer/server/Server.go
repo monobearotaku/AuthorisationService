@@ -27,6 +27,8 @@ func (s *Server) Start() error {
 	var err error
 	s.DatabaseConn, err = dbComm.ConnectToDb()
 	if err != nil {
+
+
 		return err
 	}
 	return nil
